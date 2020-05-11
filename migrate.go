@@ -535,24 +535,36 @@ func (ms MigrationSet) PlanMigration(db *sql.DB, dialect string, m MigrationSour
 	}
 
 	// Sort migrations that have been run by Id.
-	var existingMigrations []*Migration
+	var (
+		dirtyExistingMigrations []*Migration
+		existingMigrations      []*Migration
+	)
 	for _, migrationRecord := range migrationRecords {
-		existingMigrations = append(existingMigrations, &Migration{
+		dirtyExistingMigrations = append(dirtyExistingMigrations, &Migration{
 			Id: migrationRecord.Id,
 		})
 	}
-	sort.Sort(byId(existingMigrations))
+	sort.Sort(byId(dirtyExistingMigrations))
 
+	migrationsSearch := make(map[string]struct{})
+	for _, migration := range migrations {
+		migrationsSearch[migration.Id] = struct{}{}
+	}
 	// Make sure all migrations in the database are among the found migrations which
 	// are to be applied.
 	if !ms.IgnoreUnknown {
-		migrationsSearch := make(map[string]struct{})
-		for _, migration := range migrations {
-			migrationsSearch[migration.Id] = struct{}{}
-		}
-		for _, existingMigration := range existingMigrations {
+		for _, existingMigration := range dirtyExistingMigrations {
 			if _, ok := migrationsSearch[existingMigration.Id]; !ok {
 				return nil, nil, newPlanError(existingMigration, "unknown migration in database")
+			}
+
+			existingMigrations = append(existingMigrations, existingMigration)
+		}
+	} else {
+		// If IgnoreUnknown set to true: just skip unknown migrations in DB and execute all known
+		for _, existingMigration := range dirtyExistingMigrations {
+			if _, ok := migrationsSearch[existingMigration.Id]; !ok {
+				existingMigrations = append(existingMigrations, existingMigration)
 			}
 		}
 	}
