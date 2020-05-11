@@ -5,11 +5,11 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"gopkg.in/gorp.v1"
 	"io/ioutil"
 	"os"
 
-	"github.com/rubenv/sql-migrate"
-	"gopkg.in/gorp.v1"
+	"github.com/iqw/sql-migrate"
 	"gopkg.in/yaml.v2"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -32,11 +32,12 @@ func ConfigFlags(f *flag.FlagSet) {
 }
 
 type Environment struct {
-	Dialect    string `yaml:"dialect"`
-	DataSource string `yaml:"datasource"`
-	Dir        string `yaml:"dir"`
-	TableName  string `yaml:"table"`
-	SchemaName string `yaml:"schema"`
+	Dialect       string `yaml:"dialect"`
+	DataSource    string `yaml:"datasource"`
+	Dir           string `yaml:"dir"`
+	TableName     string `yaml:"table"`
+	SchemaName    string `yaml:"schema"`
+	IgnoreUnknown bool   `yaml:"ignore_unknown"`
 }
 
 func ReadConfig() (map[string]*Environment, error) {
@@ -84,6 +85,10 @@ func GetEnvironment() (*Environment, error) {
 
 	if env.SchemaName != "" {
 		migrate.SetSchema(env.SchemaName)
+	}
+
+	if env.IgnoreUnknown != false {
+		migrate.SetIgnoreUnknown(env.IgnoreUnknown)
 	}
 
 	return env, nil

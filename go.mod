@@ -1,6 +1,6 @@
-module github.com/rubenv/sql-migrate
+module github.com/iqw/sql-migrate
 
-go 1.11
+go 1.14
 
 require (
 	github.com/denisenkom/go-mssqldb v0.0.0-20191001013358-cfbb681360f0
@@ -13,7 +13,6 @@ require (
 	github.com/mitchellh/cli v1.0.0
 	github.com/olekukonko/tablewriter v0.0.2
 	github.com/ziutek/mymysql v1.5.4 // indirect
-	google.golang.org/appengine v1.6.5 // indirect
 	gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127
 	gopkg.in/gorp.v1 v1.7.2
 	gopkg.in/yaml.v2 v2.2.5
